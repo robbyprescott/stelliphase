@@ -8,8 +8,12 @@ function ResizableLayout({ leftPanel, rightPanel, isRightCollapsed = false, onTo
   const collapsedWidth = 50 // pixels when collapsed
 
   const handleMouseDown = useCallback(() => {
-    setIsDragging(true)
-  }, [])
+    if (isRightCollapsed) {
+      onToggleCollapse()
+    } else {
+      setIsDragging(true)
+    }
+  }, [isRightCollapsed, onToggleCollapse])
 
   const handleMouseMove = useCallback((e) => {
     if (!isDragging || !containerRef.current) return
@@ -60,13 +64,14 @@ function ResizableLayout({ leftPanel, rightPanel, isRightCollapsed = false, onTo
         onMouseDown={handleMouseDown}
         role="separator"
         aria-label="Resize panels"
-        style={{
-          opacity: isRightCollapsed ? 0 : 1,
-          pointerEvents: isRightCollapsed ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease-in-out'
-        }}
       >
-        <div className="resizer-handle" />
+        <div
+          className="resizer-handle"
+          style={{
+            opacity: isRightCollapsed ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+        />
         <button
           className="collapse-button-resizer"
           onClick={(e) => {
