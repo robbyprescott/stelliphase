@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
-import RegularPolygon from '../RegularPolygon/RegularPolygon'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import ShapeSequence from '../ShapeSequence/ShapeSequence'
 import './Viewer.css'
 
 function Viewer({ zoom = 1, triangleRotating = false, rotationSpeed = 1 }) {
@@ -9,6 +9,25 @@ function Viewer({ zoom = 1, triangleRotating = false, rotationSpeed = 1 }) {
   const animationRef = useRef(null)
   const startTimeRef = useRef(null)
   const zoomTimeoutRef = useRef(null)
+
+  // Create shape sequence
+  // const shapeSequence = useMemo(() => {
+  //   const sequence = new ShapeSequence({ currentRadius: 50 })
+  //   sequence.circle()
+  //   sequence.nest(3)
+  //   sequence.circle()
+  //   return sequence
+  // }, [])
+
+  const shapeSequence = useMemo(() => {
+    const sequence = new ShapeSequence({ currentRadius: 50 })
+    sequence.circle()
+    for (let i = 0; i < 9; i++) {
+      sequence.nest(3)
+    }
+    sequence.circle()
+    return sequence
+  }, [])
 
   useEffect(() => {
     if (triangleRotating) {
@@ -60,7 +79,7 @@ function Viewer({ zoom = 1, triangleRotating = false, rotationSpeed = 1 }) {
   }, [zoom])
 
   // Calculate viewBox based on zoom level (centered on origin at 0,0)
-  const baseSize = 300000
+  const baseSize = 100000000
   const viewBoxWidth = baseSize / zoom
   const viewBoxHeight = baseSize / zoom
   const viewBoxX = -viewBoxWidth / 2
@@ -77,31 +96,22 @@ function Viewer({ zoom = 1, triangleRotating = false, rotationSpeed = 1 }) {
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         >
           <svg viewBox={viewBox} preserveAspectRatio="xMidYMid meet">
-            {/* Circle with radius 2 (scaled to 50000) - Back layer */}
-            <circle
-              cx="0"
-              cy="0"
-              r="50000"
-              fill="#FFB3BA"
-              stroke="none"
-            />
-
-            {/* Regular polygon - Middle layer */}
-            <RegularPolygon
-              nSides={6}
-              radius={50000}
-              rotation={rotation}
-              fill="#BAE1FF"
-            />
-
-            {/* Circle with radius 1 (scaled to 25000) - Front layer */}
-            <circle
-              cx="0"
-              cy="0"
-              r="25000"
-              fill="#E0BBE4"
-              stroke="none"
-            />
+            {(() => {
+              // Update all polygon rotations before rendering
+              for (let i = 0; i < shapeSequence.shapes.length; i++) {
+                const shape = shapeSequence.getShape(i)
+                // Check if shape is a RegularPolygon (has nSides property)
+                if (shape.nSides !== undefined) {
+                  // Store the initial rotation as baseRotation if not already set
+                  if (shape.baseRotation === undefined) {
+                    shape.baseRotation = shape.rotation
+                  }
+                  // Apply animated rotation on top of base rotation (convert degrees to radians)
+                  shape.rotation = shape.baseRotation + (rotation * Math.PI / 180)
+                }
+              }
+              return shapeSequence.render(1000)
+            })()}
           </svg>
         </motion.div>
 

@@ -6,7 +6,7 @@ import './App.css'
 
 function App() {
   const [isEditorCollapsed, setIsEditorCollapsed] = useState(false)
-  const [zoom, setZoom] = useState(1) // Zoom level: 1 = 100%, 2 = 200%, etc.
+  const [zoom, setZoom] = useState(420) // Zoom level: 420 = 42,000% default
   const [triangleRotating, setTriangleRotating] = useState(false)
   const [rotationSpeed, setRotationSpeed] = useState(1) // Speed multiplier: 0.5 to 3
 

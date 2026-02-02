@@ -14,6 +14,23 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
     pausedAt: 0
   })
 
+  // Zoom constants
+  const MIN_ZOOM = 0.01
+  const MAX_ZOOM = 5
+  const ANIMATION_MAX_ZOOM = 420
+  const MIN_LOG = Math.log(MIN_ZOOM)
+  const MAX_LOG = Math.log(MAX_ZOOM)
+
+  // Convert zoom to linear slider value (0-100)
+  const zoomToSlider = (zoomValue) => {
+    return ((Math.log(zoomValue) - MIN_LOG) / (MAX_LOG - MIN_LOG)) * 100
+  }
+
+  // Convert linear slider value (0-100) to zoom
+  const sliderToZoom = (sliderValue) => {
+    return Math.exp(MIN_LOG + (sliderValue / 100) * (MAX_LOG - MIN_LOG))
+  }
+
   const stopAnimation = () => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current)
@@ -45,7 +62,11 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
 
-        const currentZoom = startZoom + (targetZoom - startZoom) * progress
+        // Interpolate logarithmically
+        const startLog = Math.log(startZoom)
+        const targetLog = Math.log(targetZoom)
+        const currentLog = startLog + (targetLog - startLog) * progress
+        const currentZoom = Math.exp(currentLog)
         onZoomChange(currentZoom)
 
         if (progress < 1) {
@@ -61,12 +82,10 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
     }
 
     // Start new animation
-    const minZoom = 0.1
-    const maxZoom = 5
-    const midpoint = (minZoom + maxZoom) / 2
-    const targetZoom = zoom > midpoint ? minZoom : maxZoom
+    const midpoint = 6.25 // 625% threshold
+    const targetZoom = zoom > midpoint ? MIN_ZOOM : ANIMATION_MAX_ZOOM
     const startZoom = zoom
-    const duration = 8000 // 8 seconds
+    const duration = 16000 // 16 seconds
     const startTime = Date.now()
 
     animationStateRef.current = {
@@ -84,8 +103,11 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
       const elapsed = Date.now() - animationStateRef.current.startTime
       const progress = Math.min(elapsed / animationStateRef.current.duration, 1)
 
-      const currentZoom = animationStateRef.current.startZoom +
-        (animationStateRef.current.targetZoom - animationStateRef.current.startZoom) * progress
+      // Interpolate logarithmically
+      const startLog = Math.log(animationStateRef.current.startZoom)
+      const targetLog = Math.log(animationStateRef.current.targetZoom)
+      const currentLog = startLog + (targetLog - startLog) * progress
+      const currentZoom = Math.exp(currentLog)
       onZoomChange(currentZoom)
 
       if (progress < 1) {
@@ -126,13 +148,14 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
         </button>
         <input
           type="range"
-          min="0.1"
-          max="5"
-          step="0.01"
-          value={zoom}
+          min="0"
+          max="200"
+          step="0.1"
+          value={zoomToSlider(zoom)}
           onChange={(e) => {
             handleSliderInteraction()
-            onZoomChange(parseFloat(e.target.value))
+            const sliderValue = parseFloat(e.target.value)
+            onZoomChange(sliderToZoom(sliderValue))
           }}
           onMouseDown={handleSliderInteraction}
           onTouchStart={handleSliderInteraction}
