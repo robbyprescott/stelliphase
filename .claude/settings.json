@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(**)",
+      "Read(Stelliphase/**)",
+      "Write(Stelliphase/**)",
+      "Edit(Stelliphase/**)",
+      "MultiEdit(Stelliphase/**)",
+      "Glob(Stelliphase/**)",
+      "Grep(Stelliphase/**)",
+      "LS(Stelliphase/**)"
+    ],
+    "deny": []
+  }
+}
