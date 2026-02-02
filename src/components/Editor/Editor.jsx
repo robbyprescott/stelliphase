@@ -2,14 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './Editor.css'
 
-function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleRotatingChange }) {
-  const [svgCode, setSvgCode] = useState(`<svg width="300" height="300" viewBox="0 0 300 300">
-  <circle cx="150" cy="150" r="100" fill="#646cff" />
-  <circle cx="150" cy="150" r="70" fill="#535bf2" />
-  <text x="150" y="160" text-anchor="middle" fill="white" font-size="28">
-    Stelliphase
-  </text>
-</svg>`)
+function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleRotatingChange, rotationSpeed, onRotationSpeedChange }) {
   const [isAnimating, setIsAnimating] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const animationRef = useRef(null)
@@ -161,7 +154,6 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
               className="editor-header-content"
             >
               <h2>SVG Editor</h2>
-              <span className="zoom-display">Zoom: {(zoom * 100).toFixed(0)}%</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -177,26 +169,8 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
             transition={{ duration: 0.2 }}
           >
             <div className="editor-section">
-              <h3>SVG Code</h3>
-              <textarea
-                className="code-editor"
-                value={svgCode}
-                onChange={(e) => setSvgCode(e.target.value)}
-                spellCheck="false"
-              />
-            </div>
-
-            <div className="editor-section">
               <h3>Properties</h3>
               <div className="property-controls">
-                <div className="property-group">
-                  <label>Width</label>
-                  <input type="number" defaultValue="300" />
-                </div>
-                <div className="property-group">
-                  <label>Height</label>
-                  <input type="number" defaultValue="300" />
-                </div>
                 <div className="property-group">
                   <label>
                     <input
@@ -205,12 +179,24 @@ function Editor({ isCollapsed, zoom, onZoomChange, triangleRotating, onTriangleR
                       onChange={(e) => onTriangleRotatingChange(e.target.checked)}
                       style={{ marginRight: '0.5rem' }}
                     />
-                    Rotate Triangle
+                    Rotate
                   </label>
+                </div>
+                <div className="property-group">
+                  <label>Speed</label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={rotationSpeed}
+                    onChange={(e) => onRotationSpeedChange(parseFloat(e.target.value))}
+                    style={{ width: '100%' }}
+                  />
+                  <span style={{ fontSize: '0.8rem', color: '#aaa' }}>{rotationSpeed.toFixed(1)}x</span>
                 </div>
               </div>
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>
