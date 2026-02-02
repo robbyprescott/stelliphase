@@ -1,9 +1,10 @@
 import Polygon from '../Polygon/Polygon'
 
-class RegularPolygon extends Polygon {
-  constructor({ nSides = 3, radius = 1, rotation = 0, fill = '#BAE1FF', stroke = 'none', fillRule = 'nonzero' } = {}) {
+class StarPolygon extends Polygon {
+  constructor({ nSides = 5, vertexJump = 2, radius = 1, rotation = 0, fill = '#BAE1FF', stroke = 'none', fillRule = 'evenodd' } = {}) {
     super({ radius, rotation, fill, stroke, fillRule })
     this.nSides = nSides
+    this.vertexJump = vertexJump
   }
 
   calculatePoints(baseSize = 1) {
@@ -12,8 +13,10 @@ class RegularPolygon extends Polygon {
     const startAngle = -Math.PI / 2 // Start from top (-90 degrees)
     const scaledRadius = this.radius * baseSize
 
+    // Create star by jumping vertices
     for (let i = 0; i < this.nSides; i++) {
-      const angle = startAngle + angleStep * i
+      const vertexIndex = (i * this.vertexJump) % this.nSides
+      const angle = startAngle + angleStep * vertexIndex
       const x = scaledRadius * Math.cos(angle)
       const y = scaledRadius * Math.sin(angle)
       points.push(`${x},${y}`)
@@ -23,4 +26,4 @@ class RegularPolygon extends Polygon {
   }
 }
 
-export default RegularPolygon
+export default StarPolygon

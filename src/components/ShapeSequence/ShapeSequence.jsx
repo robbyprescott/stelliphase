@@ -1,4 +1,5 @@
 import RegularPolygon from '../RegularPolygon/RegularPolygon'
+import StarPolygon from '../StarPolygon/StarPolygon'
 import Circle from '../Circle/Circle'
 import ColorUtilities from '../ColorUtilities/ColorUtilities'
 
@@ -51,6 +52,36 @@ class ShapeSequence {
     this.isFlipped = !this.isFlipped
   }
 
+  star(nSides, vertexJump = 2) {
+    // Update current radius using star-specific formula
+    this.currentRadius = this.currentRadius * (Math.cos(Math.PI / nSides) / Math.cos(Math.PI * vertexJump / nSides))
+
+    // Calculate rotation with fixed base (not dependent on shapes.length)
+    let rotation = Math.PI / (2 * nSides)
+
+    // Apply rotation correction for y-axis symmetry
+    rotation -= this.rotationCorrection(nSides)
+
+    // If flipped, add 180 degrees (Math.PI radians)
+    if (this.isFlipped) {
+      rotation += Math.PI
+    }
+
+    // Create and add new star polygon
+    const starPolygon = new StarPolygon({
+      nSides: nSides,
+      vertexJump: vertexJump,
+      radius: this.currentRadius,
+      rotation: rotation,
+      fill: this.getPastel()
+    })
+
+    this.addShape(starPolygon)
+
+    // Flip the boolean after creating the polygon
+    this.isFlipped = !this.isFlipped
+  }
+
   circle() {
     // Create and add circle with current radius
     const circle = new Circle({
@@ -77,7 +108,8 @@ class ShapeSequence {
       hue = Math.random() * 360
     } else {
       // Choose a hue at least 20 degrees away (1/4 of color wheel)
-      const offset = 40 + Math.random() * 280 // 40 to 320 degrees
+      const window = 90
+      const offset = window + Math.random() * (360 - window) // 40 to 320 degrees
       hue = (previousHue + offset) % 360
     }
 

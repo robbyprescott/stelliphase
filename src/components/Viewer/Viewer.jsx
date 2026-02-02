@@ -22,9 +22,10 @@ function Viewer({ zoom = 1, triangleRotating = false, rotationSpeed = 1 }) {
   const shapeSequence = useMemo(() => {
     const sequence = new ShapeSequence({ currentRadius: 50 })
     sequence.circle()
-    for (let i = 0; i < 9; i++) {
-      sequence.nest(3)
-    }
+    sequence.nest(7)
+    sequence.star(7, 2)
+    sequence.nest(7)
+    sequence.star(7, 3)
     sequence.circle()
     return sequence
   }, [])
